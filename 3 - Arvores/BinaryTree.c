@@ -1,3 +1,4 @@
+// Beatriz Brito Oliveira
 #include <stdio.h>
 #include <stdlib.h>
 //Definindo a estrutura da árvore
