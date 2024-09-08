@@ -1,4 +1,4 @@
-//Beatriz Brito Oliveira
+// Beatriz Brito Oliveira
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -20,23 +20,23 @@ void imprimindoArvore(Elemento *ArvoreB){
     imprimindoArvore(ArvoreB->direita);
 }
 
-void calculandoAltura(Elemento *ArvoreAVL){
-    if(ArvoreAVL->direita != NULL){
-        if(ArvoreAVL->esquerda != NULL){
-            if(ArvoreAVL->direita->altura > ArvoreAVL->esquerda->altura){
-                ArvoreAVL->altura = 1 + ArvoreAVL->direita->altura;
-            }
-            else{
-                ArvoreAVL->altura = 1 + ArvoreAVL->esquerda->altura;
-            }
-        }
-        else{
-            ArvoreAVL->altura = 1 + ArvoreAVL->direita->altura;
-        }
+int recAltura(Elemento *ArvoreAVL){
+    if(ArvoreAVL == NULL){
+        return -1;
     }
-    else if (ArvoreAVL->esquerda != NULL){
-        ArvoreAVL->altura = 1 + ArvoreAVL->esquerda->altura;
+    
+    int esq = -2, dir = -2;
+    esq  = 1 + recAltura(ArvoreAVL->esquerda);
+    dir = 1 + recAltura(ArvoreAVL->direita);
+    
+    if(esq > dir){
+        ArvoreAVL->altura = esq;
     }
+    else {
+        ArvoreAVL->altura = dir;
+    }
+    
+    return ArvoreAVL->altura ;
 }
 
 int fatorBalanceamento(Elemento *ArvoreAVL){
@@ -83,27 +83,29 @@ Elemento *balanciamento(Elemento *ArvoreAVL, int valor){
     int fB = fatorBalanceamento(ArvoreAVL);
     if(fB < -1){
         if(fatorBalanceamento(ArvoreAVL->direita) < 0){
-            printf("ROTAÇÃO SIMPLES A ESQUERDA\n");
+            //printf("ROTAÇÃO SIMPLES A ESQUERDA\n");
             ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
         else{
-            printf("ROTAÇÃO DUPLA A ESQUERDA\n");
+            //printf("ROTAÇÃO DUPLA A ESQUERDA\n");
             ArvoreAVL->direita = rotacaoDireita(ArvoreAVL->direita);
+            recAltura(ArvoreAVL);
             ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
     }
     else if (fB > 1 ){
         if(fatorBalanceamento(ArvoreAVL->esquerda) > 0){
-            printf("ROTAÇÃO SIMPLES A DIREITA\n");
+            //printf("ROTAÇÃO SIMPLES A DIREITA\n");
             ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
         else{
-            printf("ROTAÇÃO DUPLA A DIREITA\n");
+            //printf("ROTAÇÃO DUPLA A DIREITA\n");
             ArvoreAVL->esquerda = rotacaoEsquerda(ArvoreAVL->esquerda);
-            calculandoAltura(ArvoreAVL);
+            recAltura(ArvoreAVL);
             ArvoreAVL = rotacaoDireita(ArvoreAVL);
         }
     }
+    recAltura(ArvoreAVL);
     return ArvoreAVL;
 }
 
@@ -126,12 +128,11 @@ Elemento *inseriFolha(int valor, Elemento *ArvoreAVL){
         }
     }
     
-    calculandoAltura(ArvoreAVL);
+    recAltura(ArvoreAVL);
     ArvoreAVL = balanciamento(ArvoreAVL, valor);
     
     return ArvoreAVL;
 }
-
 
 
 int main(){
@@ -144,6 +145,5 @@ int main(){
     arvore = inseriFolha(3, arvore);
     imprimindoArvore(arvore);
     
-    calculandoAltura(arvore);
     return 0;
 }
