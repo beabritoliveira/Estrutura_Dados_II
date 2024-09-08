@@ -1,4 +1,4 @@
-// Beatriz Brito Oliveira
+//Beatriz Brito Oliveira
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -134,6 +134,56 @@ Elemento *inseriFolha(int valor, Elemento *ArvoreAVL){
     return ArvoreAVL;
 }
 
+Elemento *filhoEsquerda(Elemento *ArvoreAVL){
+    if(ArvoreAVL->esquerda == NULL){
+        return ArvoreAVL;
+    }
+    else{
+        return filhoEsquerda(ArvoreAVL->esquerda);
+    }
+}
+
+Elemento *excluindoElemento(Elemento *ArvoreAVL , int valor){
+    if (ArvoreAVL == NULL){
+        return ArvoreAVL;
+    }
+    else if ( valor < ArvoreAVL->valor){
+        ArvoreAVL->esquerda = excluindoElemento(ArvoreAVL->esquerda , valor);
+    }
+    else if ( valor > ArvoreAVL->valor){
+        ArvoreAVL->direita = excluindoElemento(ArvoreAVL->direita , valor);
+    }
+    else{
+        if(ArvoreAVL->direita == NULL){
+            if(ArvoreAVL->esquerda == NULL){
+                // Se o nó é folha
+                //printf("NO FOLHA \n");
+                ArvoreAVL = NULL;
+            }
+            else{
+                // Se o nó tem filho na esquerda (o filho da esquerda imediato vai substituir ele na hierarquia)
+                ArvoreAVL = ArvoreAVL->esquerda;
+            }
+        }
+        // Se o filho da direita existe
+        else{ 
+            // Se só tem o filho da direita
+             if(ArvoreAVL->esquerda == NULL){
+                 ArvoreAVL = ArvoreAVL->direita;
+             }
+             // Se o nó tem os dois filhos (esquerdo e direito) => precisa achar o filho mais a esquerda do filho da direita
+             else{
+                 Elemento *maisEsquerda = filhoEsquerda(ArvoreAVL->direita); // Recupera o valor do filho mais a esquerda do filho da direita
+                 Elemento *teste = excluindoElemento(ArvoreAVL, maisEsquerda->valor); // Elimina o valor do filho que vai ser substituido da arvore 
+                 teste->valor = maisEsquerda->valor;
+                 return teste;
+             }
+        }
+        ArvoreAVL = balanciamento(ArvoreAVL, valor);
+    }
+
+    return ArvoreAVL;
+}
 
 int main(){
     Elemento *arvore = NULL;
