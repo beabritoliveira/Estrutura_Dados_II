@@ -1,8 +1,7 @@
-// Beatriz Brito Oliveira
+//Beatriz Brito Oliveira
 #include <stdio.h>
 #include <stdlib.h>
 
-// 1°) DEFININDO A ESTRUTURA DA ÁRVORE
 struct elemento{
     int valor;
     struct elemento *esquerda;
@@ -11,6 +10,34 @@ struct elemento{
 };
 
 typedef struct elemento Elemento;
+
+void imprimindoArvore(Elemento *ArvoreB){
+    if(ArvoreB == NULL)
+        return;
+    
+    imprimindoArvore(ArvoreB->esquerda);
+    printf("%d - %d\n", ArvoreB->valor, ArvoreB->altura);
+    imprimindoArvore(ArvoreB->direita);
+}
+
+void calculandoAltura(Elemento *ArvoreAVL){
+    if(ArvoreAVL->direita != NULL){
+        if(ArvoreAVL->esquerda != NULL){
+            if(ArvoreAVL->direita->altura > ArvoreAVL->esquerda->altura){
+                ArvoreAVL->altura = 1 + ArvoreAVL->direita->altura;
+            }
+            else{
+                ArvoreAVL->altura = 1 + ArvoreAVL->esquerda->altura;
+            }
+        }
+        else{
+            ArvoreAVL->altura = 1 + ArvoreAVL->direita->altura;
+        }
+    }
+    else if (ArvoreAVL->esquerda != NULL){
+        ArvoreAVL->altura = 1 + ArvoreAVL->esquerda->altura;
+    }
+}
 
 int fatorBalanceamento(Elemento *ArvoreAVL){
     if(ArvoreAVL == NULL){
@@ -32,38 +59,52 @@ int fatorBalanceamento(Elemento *ArvoreAVL){
 
 }
 
-void *balanciamento(Elemento *ArvoreAVL, int valor){
+Elemento *rotacaoEsquerda(Elemento *ArvoreAVL){
+    // 1°) Pega o filho da esquerda da raiz e torna ele como a nova raiz
+    // 2°) Pega a raiz antiga e torna ela como o filho da esquerda
+    Elemento *NovaEsquerda = (Elemento *) malloc (sizeof(Elemento));
+    NovaEsquerda = ArvoreAVL; //Tornando a raiz o filho da esquerda
+    ArvoreAVL = ArvoreAVL->direita; // A raiz se tornando o filho da direita
+    NovaEsquerda->direita = ArvoreAVL->esquerda; // Passando os filhos da esquerda da dirieta em filhos da direita da esquerda
+    ArvoreAVL->esquerda = NovaEsquerda;
+    return ArvoreAVL;
+}
+
+Elemento *rotacaoDireita(Elemento *ArvoreAVL){
+    Elemento *NovaDireita = (Elemento *) malloc (sizeof(Elemento));
+    NovaDireita = ArvoreAVL;
+    ArvoreAVL = ArvoreAVL->esquerda; 
+    NovaDireita->esquerda = ArvoreAVL->direita; 
+    ArvoreAVL->direita = NovaDireita;
+    return ArvoreAVL;
+}
+
+Elemento *balanciamento(Elemento *ArvoreAVL, int valor){
     int fB = fatorBalanceamento(ArvoreAVL);
     if(fB < -1){
         if(fatorBalanceamento(ArvoreAVL->direita) < 0){
             printf("ROTAÇÃO SIMPLES A ESQUERDA\n");
-            return rotacaoEsquerda(ArvoreAVL);
+            ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
         else{
             printf("ROTAÇÃO DUPLA A ESQUERDA\n");
             ArvoreAVL->direita = rotacaoDireita(ArvoreAVL->direita);
-            return rotacaoEsquerda(ArvoreAVL);
+            ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
     }
     else if (fB > 1 ){
         if(fatorBalanceamento(ArvoreAVL->esquerda) > 0){
             printf("ROTAÇÃO SIMPLES A DIREITA\n");
-            return rotacaoDireita(ArvoreAVL);
+            ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
         else{
             printf("ROTAÇÃO DUPLA A DIREITA\n");
-            ArvoreAV->esquerda = rotacaoEsquerda(ArvoreAVL->esquerda);
-            return rotacaoDireita(ArvoreAVL);
+            ArvoreAVL->esquerda = rotacaoEsquerda(ArvoreAVL->esquerda);
+            calculandoAltura(ArvoreAVL);
+            ArvoreAVL = rotacaoDireita(ArvoreAVL);
         }
     }
-}
-
-Elemento *rotacaoEsquerda(Elemento *ArvoreAVL){
-    
-}
-
-Elemento *rotacaoDireita(Elemento *ArvoreAVL){
-    
+    return ArvoreAVL;
 }
 
 Elemento *inseriFolha(int valor, Elemento *ArvoreAVL){
@@ -85,24 +126,7 @@ Elemento *inseriFolha(int valor, Elemento *ArvoreAVL){
         }
     }
     
-    //RECALCULANDO ALTURA DE CADA NÓ
-    if(ArvoreAVL->direita != NULL){
-        if(ArvoreAVL->esquerda != NULL){
-            if(ArvoreAVL->direita->altura > ArvoreAVL->esquerda->altura){
-                ArvoreAVL->altura = 1 + ArvoreAVL->direita->altura;
-            }
-            else{
-                ArvoreAVL->altura = 1 + ArvoreAVL->esquerda->altura;
-            }
-        }
-        else{
-            ArvoreAVL->altura = 1 + ArvoreAVL->direita->altura;
-        }
-    }
-    else if (ArvoreAVL->esquerda != NULL){
-        ArvoreAVL->altura = 1 + ArvoreAVL->esquerda->altura;
-    }
-    
+    calculandoAltura(ArvoreAVL);
     ArvoreAVL = balanciamento(ArvoreAVL, valor);
     
     return ArvoreAVL;
@@ -118,6 +142,8 @@ int main(){
     arvore = inseriFolha(30, arvore);
     arvore = inseriFolha(40, arvore);
     arvore = inseriFolha(3, arvore);
+    imprimindoArvore(arvore);
     
+    calculandoAltura(arvore);
     return 0;
 }
