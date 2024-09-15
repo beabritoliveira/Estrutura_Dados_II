@@ -1,4 +1,4 @@
-//Beatriz Brito Oliveira
+// BEATRIZ BRITO OLIVEIRA
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,6 +11,7 @@ struct elemento{
 
 typedef struct elemento Elemento;
 
+//IMPRIMI O VALOR DO NÓ E A SUA ALTURA
 void imprimindoArvore(Elemento *ArvoreB){
     if(ArvoreB == NULL)
         return;
@@ -20,15 +21,19 @@ void imprimindoArvore(Elemento *ArvoreB){
     imprimindoArvore(ArvoreB->direita);
 }
 
+//CALCULA A ALTURA DE CADA NÓ DA ÁRVORE
 int recAltura(Elemento *ArvoreAVL){
     if(ArvoreAVL == NULL){
+        // SETADO COMO ZERO JÁ QUE SEMPRE QUE O NÓ É FOLHA ELE VAI TER COMO ALTURA 0, JÁ QUE É SOMADO 1 MAIS TARDE
         return -1;
     }
     
     int esq = -2, dir = -2;
+    // CALCULA O VALOR DOS FILHOS DA ESQUERDA E DA DIREITA E SOMA MAIS UM JÁ QUE CADA Npai = Nfilho + 1
     esq  = 1 + recAltura(ArvoreAVL->esquerda);
     dir = 1 + recAltura(ArvoreAVL->direita);
     
+    // COMPARA QUAL FILHO TEM MAIOR ALTURA, QUAL CAMINHO É MAIS LONGO, PARA DEFINIR A ALTURA CORRETA
     if(esq > dir){
         ArvoreAVL->altura = esq;
     }
@@ -39,20 +44,23 @@ int recAltura(Elemento *ArvoreAVL){
     return ArvoreAVL->altura ;
 }
 
+// DEFININDO O FATOR DE BALANCEAMENTO DE CADA NÓ
 int fatorBalanceamento(Elemento *ArvoreAVL){
     if(ArvoreAVL == NULL){
         return 0;
     }
     else{
-        if(ArvoreAVL->esquerda != NULL){
-            if (ArvoreAVL->direita != NULL){
-                return ArvoreAVL->esquerda->altura - ArvoreAVL->direita->altura;
+        if(ArvoreAVL->esquerda != NULL){ // SE O FILHO A ESQUERDA EXISTE
+            if (ArvoreAVL->direita != NULL){ // SE O FILHO A DIREITA TAMBÉM EXISTE
+                return ArvoreAVL->esquerda->altura - ArvoreAVL->direita->altura; // FATOR DE BALANCEMANETO É SEMPRE FB = filho_esquerda - filho_direita
             }
             else{
+                // SE SÓ EXISTE FILHO A ESQUERDA É O TAMANHO DO CAMINHO DA ESQUERDA MAIS UM A SUA ALTURA
                 return ArvoreAVL->esquerda->altura + 1;
             }
         }
         else if (ArvoreAVL->direita != NULL){
+            // SE SÓ EXISTE FILHO A DIREITA É O TAMANHO DO CAMINHO DA DIREITA MAIS UM A SUA ALTURA E COMO É A DIREITA O SINAL É NEGATIVO
             return - (ArvoreAVL->direita->altura + 1);
         }        
     }
@@ -67,48 +75,53 @@ Elemento *rotacaoEsquerda(Elemento *ArvoreAVL){
     ArvoreAVL = ArvoreAVL->direita; // A raiz se tornando o filho da direita
     NovaEsquerda->direita = ArvoreAVL->esquerda; // Passando os filhos da esquerda da dirieta em filhos da direita da esquerda
     ArvoreAVL->esquerda = NovaEsquerda;
+    recAltura(ArvoreAVL); //Recalculando a altura da árvore
     return ArvoreAVL;
 }
 
 Elemento *rotacaoDireita(Elemento *ArvoreAVL){
     Elemento *NovaDireita = (Elemento *) malloc (sizeof(Elemento));
-    NovaDireita = ArvoreAVL;
-    ArvoreAVL = ArvoreAVL->esquerda; 
-    NovaDireita->esquerda = ArvoreAVL->direita; 
+    NovaDireita = ArvoreAVL; // Define o valor atual da raiz como a nova direita
+    ArvoreAVL = ArvoreAVL->esquerda; // Passa o valor do filho da esquerda para ser a nova raiz 
+    NovaDireita->esquerda = ArvoreAVL->direita; //Define o filho que os filhos da direita do antigo filho da esquerda virem filhos a esquerda do novo filho da direita (antiga raiz)
     ArvoreAVL->direita = NovaDireita;
+    recAltura(ArvoreAVL); //Recalculando a altura da árvore
     return ArvoreAVL;
 }
 
+// DEFINE SE A ÁRVORE NECESSITA DE ROTAÇÃO OU NÃO; SE O FATOR DE BALANCEAMENTO É DIFERENTE 1,0 OU -1 HÁ ROTAÇÃO
 Elemento *balanciamento(Elemento *ArvoreAVL, int valor){
     int fB = fatorBalanceamento(ArvoreAVL);
     if(fB < -1){
-        if(fatorBalanceamento(ArvoreAVL->direita) < 0){
+        if(fatorBalanceamento(ArvoreAVL->direita) < 0){ 
+            // SE O NÓ DO FILHO A DIREITA É NEGATIVO SIGNIFICA QUE A ROTAÇÃO É SIMPLES, OU SEJA ELES TÃO NA MESMA DIREÇÃO (\)
             //printf("ROTAÇÃO SIMPLES A ESQUERDA\n");
             ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
         else{
-            //printf("ROTAÇÃO DUPLA A ESQUERDA\n");
+            // SE O NÓ DO FILHO A DIREITA É POSITIVO SIGNIFICA QUE A ROTAÇÃO É DUPLA, OU SEJA ELES NÃO ESTÃO NA MESMA DIREÇÃO (>)
+            //printf("ROTAÇÃO DUPLA A ESQUERDA\n"); // RSD + RSE
             ArvoreAVL->direita = rotacaoDireita(ArvoreAVL->direita);
-            recAltura(ArvoreAVL);
             ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
         }
     }
     else if (fB > 1 ){
         if(fatorBalanceamento(ArvoreAVL->esquerda) > 0){
+            // SE O NÓ DO FILHO A ESQUERDA É POSITIVO SIGNIFICA QUE A ROTAÇÃO É SIMPLES, OU SEJA ELES TÃO NA MESMA DIREÇÃO (/)
             //printf("ROTAÇÃO SIMPLES A DIREITA\n");
-            ArvoreAVL = rotacaoEsquerda(ArvoreAVL);
+            ArvoreAVL = rotacaoDireita(ArvoreAVL);
         }
         else{
-            //printf("ROTAÇÃO DUPLA A DIREITA\n");
+            // SE O NÓ DO FILHO A ESQUERDA É NEGATIVO SIGNIFICA QUE A ROTAÇÃO É DUPLA, OU SEJA ELES NÃO ESTÃO NA MESMA DIREÇÃO (<)
+            //printf("ROTAÇÃO DUPLA A DIREITA\n"); // RSE + RSD
             ArvoreAVL->esquerda = rotacaoEsquerda(ArvoreAVL->esquerda);
-            recAltura(ArvoreAVL);
             ArvoreAVL = rotacaoDireita(ArvoreAVL);
         }
     }
-    recAltura(ArvoreAVL);
     return ArvoreAVL;
 }
 
+// INSERÇÃO DE ELEMENTO NA ÁRVORE
 Elemento *inseriFolha(int valor, Elemento *ArvoreAVL){
     if (ArvoreAVL == NULL){
         //printf("FOLHA OU ÁRVORE VAZIA");
@@ -120,20 +133,22 @@ Elemento *inseriFolha(int valor, Elemento *ArvoreAVL){
         ArvoreAVL = novoNo;
     }
     else{
-        if (valor < ArvoreAVL->valor){
+        if (valor < ArvoreAVL->valor){ // SE O VALOR É MENOR QUE O VALOR COMPARADO DA RAIZ
             ArvoreAVL->esquerda = inseriFolha(valor, ArvoreAVL->esquerda);
         }
-        else if (valor > ArvoreAVL->valor){
+        else if (valor > ArvoreAVL->valor){ // SE O VALOR É MAIOR QUE O VALOR COMPARADO DA RAIZ
             ArvoreAVL->direita = inseriFolha(valor, ArvoreAVL->direita);
         }
     }
     
+    //RECALCULA A ALTURA DA ARVORE PARA CALCULAR O BALANCIAMENTO DEPOIS 
     recAltura(ArvoreAVL);
     ArvoreAVL = balanciamento(ArvoreAVL, valor);
     
     return ArvoreAVL;
 }
 
+// ENCONTRA O FILHO MAIS A ESQUERDA 
 Elemento *filhoEsquerda(Elemento *ArvoreAVL){
     if(ArvoreAVL->esquerda == NULL){
         return ArvoreAVL;
@@ -149,9 +164,11 @@ Elemento *excluindoElemento(Elemento *ArvoreAVL , int valor){
     }
     else if ( valor < ArvoreAVL->valor){
         ArvoreAVL->esquerda = excluindoElemento(ArvoreAVL->esquerda , valor);
+        recAltura(ArvoreAVL);
     }
     else if ( valor > ArvoreAVL->valor){
         ArvoreAVL->direita = excluindoElemento(ArvoreAVL->direita , valor);
+        recAltura(ArvoreAVL);
     }
     else{
         if(ArvoreAVL->direita == NULL){
@@ -179,20 +196,43 @@ Elemento *excluindoElemento(Elemento *ArvoreAVL , int valor){
                  return teste;
              }
         }
-        ArvoreAVL = balanciamento(ArvoreAVL, valor);
+        // CALCULA O NOVO BALANCIAMENTO
+        ArvoreAVL = balanciamento(ArvoreAVL,valor);
     }
 
     return ArvoreAVL;
 }
 
 int main(){
+    printf("-- INSERINDO ELEMENTO --\n");
     Elemento *arvore = NULL;
     arvore = inseriFolha(10, arvore);
     arvore = inseriFolha(20, arvore);
-    arvore = inseriFolha(5, arvore);
+    arvore = inseriFolha(6, arvore);
     arvore = inseriFolha(30, arvore);
+    //ROTAÇÃO SIMPLES A ESQUERDA
     arvore = inseriFolha(40, arvore);
+    //ROTAÇÃO DUPLA A ESQUERDA
+    arvore = inseriFolha(17, arvore);
+    arvore = inseriFolha(23, arvore);
+    arvore = inseriFolha(18, arvore);
+    arvore = inseriFolha(1, arvore);
+    //ROTAÇÃO DUPLA A DIREITA
     arvore = inseriFolha(3, arvore);
+    arvore = inseriFolha(22, arvore);
+    //ROTAÇÃO SIMPLES A DIREITA
+    arvore = inseriFolha(21, arvore);
+    imprimindoArvore(arvore);
+    
+    
+    printf("\n\n-- EXCLUINDO ELEMENTO --\n");
+    //REMOVENDO NÓS
+    arvore = (excluindoElemento(arvore, 23));
+    arvore = (excluindoElemento(arvore, 21));
+    // removendo a raiz
+    arvore = (excluindoElemento(arvore, 20));
+    // excluindo nó com filho
+    arvore = (excluindoElemento(arvore, 17));
     imprimindoArvore(arvore);
     
     return 0;
