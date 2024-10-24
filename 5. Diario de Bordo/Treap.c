@@ -68,6 +68,52 @@ void imprimindoArvore(Elemento *Arvore){
     imprimindoArvore(Arvore->dir);
 }
 
+Elemento *filhoEsquerda(Elemento *Arvore){
+    if(Arvore->esq == NULL){
+        return Arvore;
+    }
+    else{
+        return filhoEsquerda(Arvore->esq);
+    }
+}
+
+
+Elemento *excluirElemento(Elemento *Arvore, int valor, int prioridade){
+    if(Arvore == NULL){
+        //Não achou o Elemento;
+        return Arvore;
+    }
+    else if ( valor < Arvore->valor){
+        Arvore->esq = excluirElemento(Arvore->esq , valor, prioridade);
+    }
+    else if ( valor > Arvore->valor){
+        Arvore->dir = excluirElemento(Arvore->dir , valor, prioridade);
+    }
+    else{
+        Elemento *Treap = (Elemento *) malloc(sizeof(Elemento));
+        if (Arvore->prioridade == prioridade){
+            if(Arvore->dir != NULL){
+                Treap = filhoEsquerda(Arvore->dir);
+                Arvore = excluirElemento(Arvore, Treap->valor, Treap->prioridade);
+                Arvore->valor = Treap->valor;
+                Arvore->prioridade = Treap->prioridade;
+            }
+            else{
+                Arvore = Arvore->esq;
+            }
+            
+        }
+        else{
+            if(filhoEsquerda(Arvore->dir)->valor == valor)
+                Arvore = excluirElemento(Arvore->dir, valor, prioridade);
+            else
+                Arvore = excluirElemento(Arvore->esq, valor, prioridade);
+        }
+    }
+    return Arvore;
+}
+
+
 int main()
 {
     printf("-- INSERINDO ELEMENTO --\n");
@@ -82,6 +128,10 @@ int main()
     arvore = inserirElemento(arvore, 15, 29);
     arvore = inserirElemento(arvore, 17, 11);
     arvore = inserirElemento(arvore, 27, 70);
+    imprimindoArvore(arvore);
+    
+    printf("\n\n-- EXCLUINDO ELEMENTO --\n");
+    arvore = excluirElemento(arvore, 14, 78);
     imprimindoArvore(arvore);
     return 0;
 }
