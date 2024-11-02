@@ -53,55 +53,80 @@ Elemento *inserirElemento(Elemento *Arvore, int valor){
     else{
         //SE valor1 e valor2 estão preenchidos precisa quebrar
         //PRIMEIRO DESCOBRE QUEM TÁ NO MEIO (QUE É O QUE VAI SUBIR)
+        printf("HELLO\n");
         int v1 = Arvore->valor1 , v2 = Arvore->valor2;
         Elemento *novoNO = (Elemento *) malloc(sizeof(Elemento));
-        if (Arvore->pai == NULL){ // NÃO TEM RAIZ EM CIMA
+        // SE A ARVORE->PAI == NULL ELA É A MAIOR RAIZ
+        if(Arvore->pai != NULL){
+            //1° DESCOBRE QUEM TÁ NO MEIO
+            if(Arvore->pai->valor2 != NULL){
+                //Precisa escalar um nível
+                printf("Adiciona um nível");
+                
+            }
+            else{
+                printf("Adiciona um na raiz");
+                if(Arvore->pai->valor1 > valor){
+                    Arvore->pai->valor2 = Arvore->pai->valor1;
+                    Arvore->pai->direita = Arvore->pai->meio;
+                    Arvore->pai->meio = Arvore->pai->esquerda;
+                    Arvore->pai->valor1 = valor;
+                }
+            }
+        }
+        else{
+            printf("Cria a raiz");
             if(valor > v1 && valor < v2){
                 printf("valor meio");
                 novoNO = criaNO(valor);
                 novoNO->esquerda = criaNO(v1);
+                if(Arvore->esquerda != NULL)
+                    novoNO->esquerda->esquerda = Arvore->esquerda;
                 novoNO->meio = criaNO(v2);
+                if(Arvore->direita != NULL)
+                    novoNO->meio->meio = Arvore->direita;
+                //Checa o primeiro valor da arvore meio anterior para saber se entra na esquerda ou menio atual
+                if(Arvore->meio != NULL){
+                    if(Arvore->meio->valor1 > valor){
+                    novoNO->meio->esquerda = Arvore->meio;
+                    }
+                    else{
+                        novoNO->esquerda->meio = Arvore->meio;
+                    }
+                }
+                
             }
             else if (valor < v1){
                 printf("valor1 meio");
                 novoNO = criaNO(v1);
                 novoNO->esquerda = criaNO(valor);
+                if(Arvore->esquerda != NULL){
+                    novoNO->esquerda->meio = Arvore->esquerda;
+                }
                 novoNO->meio = criaNO(v2);
+                if(Arvore->meio != NULL){
+                    novoNO->meio->esquerda = Arvore->meio;
+                }
+                if (Arvore->direita != NULL){
+                    novoNO->meio->meio = Arvore->direita;
+                }
             }
             else{
                 printf("valor2 meio");
                 novoNO = criaNO(v2);
                 novoNO->esquerda = criaNO(v1);
+                if(Arvore->esquerda != NULL){
+                    novoNO->esquerda->esquerda = Arvore->esquerda;
+                }
+                if(Arvore->meio != NULL){
+                    novoNO->esquerda->meio = Arvore->meio;
+                }
                 novoNO->meio = criaNO(valor);
+                if (Arvore->direita != NULL){
+                    novoNO->meio->esquerda = Arvore->direita;
+                }
             }
             Arvore = novoNO;
-        }
-        else{
-            if(Arvore>pai->valor2 == NULL){
-                //Só tem um elemento na RAIZ
-                // checar se o valor1 do pai é maior ou menor que o novo valor entrando na raiz
-                if(valor > v1 && valor < v2){
-                    //valor = sobe
-                    novoNO = Arvore;
-                    novoNO->pai->valor2 = valor;
-                    novoNO->pai->direita = criaNO(v2);
-                    novoNO->pai->meio = inserirElemento(novoNO->meio, v1);
-                }
-                else if(valor < v1){
-                    //valor1 = sobe
-                    novoNO = Arvore;
-                    novoNO->pai->valor2 = v1;
-                    novoNO->pai->direita = criaNO(v2);
-                    novoNO->pai->meio = inserirElemento(novoNO->meio, valor);
-                }
-                else{
-                    //valor2 = sobe
-                    novoNO = Arvore;
-                    novoNO->pai->valor2 = v2;
-                    novoNO->pai->direita = criaNO(valor);
-                    novoNO->pai->meio = inserirElemento(novoNO->meio, v1);
-                }
-            }
         }
     }
     return Arvore;
@@ -113,13 +138,17 @@ int main()
     Elemento *Arvore = NULL;
     Arvore = inserirElemento(Arvore, 10);
     Arvore = inserirElemento(Arvore, 5);
-    printf("\n%d\n", Arvore->valor1);
-    printf("\n%d\n", Arvore->valor2);
+    Arvore = inserirElemento(Arvore, 20);
+    /*printf("\n%d\n", Arvore->valor1); //10
+    printf("\n%d\n", Arvore->esquerda->valor1); //5
+    printf("\n%d\n", Arvore->meio->valor1); // 20*/
     
-    Arvore = inserirElemento(Arvore, 8);
-    printf("\n%d\n", Arvore->valor1);
-    printf("\n%d\n", Arvore->esquerda->valor1);
-    printf("\n%d\n", Arvore->meio->valor1);
+    printf("\nNOVA INSERçÃO\n");
+    Arvore = inserirElemento(Arvore, 15);
+    printf("\n%d\n", Arvore->valor1); // 10
+    printf("\n%d\n", Arvore->esquerda->valor1); //5
+    printf("\n%d\n", Arvore->meio->valor1); //15
+    printf("\n%d\n", Arvore->meio->valor2); //20
 
     
     return 0;
